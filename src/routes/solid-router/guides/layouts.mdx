@@ -1,0 +1,164 @@
+---
+title: "Layouts"
+---
+
+When you wish for a component to persist across multiple pages, you can define a layout that wraps around the content of the page.
+
+## Global layout
+
+If you wish for the layout of a pge to not update on navigation, you can define a layout at the root level of your project.
+This layout will be used for all pages in your project, making it the best place for top level navigation, headers, footers, etc.
+
+To define a root-level layout, you can create the desired layout and pass it to the optional `root` prop of the `Router` component:
+
+```jsx title="src/layouts/DefaultLayout.jsx"
+export const DefaultLayout = (props) => (
+  <>
+    <header>
+        <h1>My App</h1>
+    </header>
+    {props.children}
+  </>
+)
+```
+
+```jsx title="src/app.jsx"
+import { render } from "solid-js/web";
+import { Router } from "@solidjs/router";
+import App from "../layout/DefaultLayout";
+
+render(() => (
+  <Router root={App} />
+), document.getElementById("root"));
+```
+
+<Callout>
+  In addition to the `root` being a good place for top-level layouts, it is also the best place to pass [Context Providers](/concepts/context) that you wish to be available to all pages in your project.
+</Callout>
+
+## Page layouts
+
+When using [nested routes](/solid-router/concepts/nested-routes), you can define a layout for a specific page or group of pages.
+This will not be used for all pages in your project, but only for the pages that are nested under the route that the layout is defined for.
+
+By using `props.children`, which is passed to the route component, you can render the content of the page in the desired location:
+
+<TabsCodeBlocks>
+
+<div id="App.jsx">
+```jsx title="src/app.jsx"
+import { render } from "solid-js/web";
+import { Router, Route } from "@solidjs/router";
+import App from "../layout/DefaultLayout";
+import { PageWrapper } from "../layout/PageWrapper";
+
+render(() => (
+  <Router root={App}>
+    <Route path="/" component={PageWrapper}>
+        <Route path="/" component={Home} />
+        <Route path="/about" component={About} />
+    </Route>
+  </Router>
+), document.getElementById("root"));
+```
+</div>
+
+<div id="PageWrapper.jsx">
+```jsx title="src/layouts/PageWrapper.jsx"
+export const PageWrapper = (props) => (
+  <div>
+    <h1>Page Title</h1>
+    {props.children}
+  </div>
+)
+```
+</div>
+
+<div id="index.jsx">
+```jsx title="src/pages/index.jsx"
+export const Home = () => (
+  <p>This is the index page</p>
+)
+```
+</div>
+
+<div id="About.jsx">
+```jsx title="src/pages/About.jsx"
+export const About = () => (
+  <p>This is the about page</p>
+)
+```
+</div>
+
+</TabsCodeBlocks>
+
+This would render the following HTML for the index page:
+
+```powershell title="http://localhost:3000/"
+<header>
+    <h1>My App</h1>
+</header>
+<div>
+    <h1>Page Title</h1>
+    <p>This is the index page</p>
+</div>
+```
+
+And the following HTML for the about page:
+
+```powershell  title="http://localhost:3000/about"
+<header>
+    <h1>My App</h1>
+</header>
+<div>
+    <h1>Page Title</h1>
+    <p>This is the about page</p>
+</div>
+```
+
+### Complex layouts
+
+With nested routes, you can also define multiple layers of layouts.
+This can be useful when you have a layout that you wish to be used for a group of pages, and then a more specific layout for a single page.
+Ultimately, you can have as many layers of layouts as you wish:
+
+```jsx
+<Route
+  path="/"
+  component={(props) =>
+    <div>
+      First layer {props.children}
+    </div>
+  }
+>
+  <Route
+    path="/1"
+    component={(props) =>
+      <div>
+        Second layer {props.children}
+      </div>
+    }
+  >
+    <Route path="/2"
+      component={() => <div>Innermost layer</div>}>          
+    </Route>
+  </Route>
+</Route>
+```
+
+This would render the following HTML for the `/1/2` page:
+
+```powershell title="http://localhost:3000/1/2"
+<header>
+    <h1>My App</h1>
+</header>
+<div>
+    First layer
+    <div>
+        Second layer
+        <div>
+            Innermost layer
+        </div>
+    </div>
+</div>
+```

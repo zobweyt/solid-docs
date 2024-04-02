@@ -1,0 +1,53 @@
+---
+title: Installation & Setup
+---
+
+Solid Router is not included in Solid by default.
+To use it, you must install it separately using your package manager of choice:
+
+<TabsCodeBlocks>
+<div id="npm">
+```bash frame="none"
+npm i @solidjs/router
+```
+</div>
+
+<div id="yarn">
+```bash frame="none"
+yarn add @solidjs/router
+```
+</div>
+
+<div id="pnpm">
+```bash frame="none"
+pnpm add @solidjs/router
+```
+</div>
+
+</TabsCodeBlocks>
+
+
+<Callout title="Requirements">
+The latest version of Solid Router is `0.10.x`.
+To use this version, Solid v1.8.4 or later is required.
+</Callout>
+
+## Configuration
+
+To use Solid Router, you need to wrap your application with the [`Router`](/solid-router/reference/components/router) component.
+This component is the root of your routing configuration and is responsible for rendering the correct component based on the current URL.
+
+To configure your routes, import the `Router` component and then start the application by rendering the router component:
+
+```jsx title="againstpp.tsx"
+import { render } from "solid-js/web";
+import { Router } from "@solidjs/router";
+
+render(
+  () => <Router />,
+  document.getElementById("root")
+);
+```
+
+This will render the router component and start listening to URL changes.
+You are now ready to start [defining your routes](/solid-router/getting-started/defining-routes/)!

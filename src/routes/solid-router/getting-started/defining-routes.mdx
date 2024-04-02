@@ -2,15 +2,23 @@
 title: "Defining Routes"
 ---
 
-Routes can be defined directly in an app's template using JSX, but can also be passed to a route configuration directly as an object.
+import { TabsCodeBlocks } from "~/ui/tab-code-blocks"
 
-## Component Routing
+There are two ways to define routes in Solid Router:
+- [Component Routing](#component-routing): Define routes using JSX
+- [Configuration-based Routing](#configuration-based-routing): Define routes using an array of route definitions
 
-To define routes using JSX, the [`Route`](/solid-router/reference/components/route) component is used to define a path and the component to render when the user navigates to that path.
 
-1. Add each route to a [`<Router>`](/solid-router/reference/components/router) using the `Route` component.
-   A path as well as an element or component to render must be provided for when the user navigates to the indicated path.
+## Component routing
 
+Component routing is the most common way to define routes in Solid Router.
+It allows for the use of JSX to define routes and the components to render when the user navigates to that path.
+
+Each route is added to the `Router` component using [`Route`](/solid-router/reference/components/route).
+The `Route` component takes a `path` prop, which is the path to match, and a `component` prop, which is the component to render when the path matches:
+
+<TabsCodeBlocks>
+<div id="src/app.jsx">
 ```jsx
 import { render } from "solid-js/web";
 import { Router, Route } from "@solidjs/router";
@@ -21,112 +29,39 @@ import Users from "./pages/Users";
 render(
 	() => (
 		<Router>
-			<Route path="/users" component={Users} />
 			<Route path="/" component={Home} />
+			<Route path="/users" component={Users} />
 		</Router>
 	),
 	document.getElementById("app")
 );
 ```
-
-2. Provide a root level layout (optional)
-
-A root level layout will always be present and will not update on page change.
-This is the ideal place for any top level navigation and [Context Providers](/concepts/context#consuming-context).
-
+</div>
+<div id="src/pages/Home.jsx">
 ```jsx
-import { render } from "solid-js/web";
-import { Router, Route } from "@solidjs/router";
-
-import Home from "./pages/Home";
-import Users from "./pages/Users";
-import Nav from "./components/Nav";
-
-const App = (props) => (
-	<>
-		<h1>Site Title</h1>
-		<Nav />
-		{props.children}
-	</>
-);
-
-render(
-	() => (
-		<Router root={App}>
-			<Route path="/users" component={Users} />
-			<Route path="/" component={Home} />
-		</Router>
-	),
-	document.getElementById("app")
-);
+export const Home = () => <div>Home Page</div>;
 ```
+</div>
 
-3. Create a CatchAll Route (404 page)
-
-When pages are not found at any nested level, providing a catchall, or 404 page, provides a fallback option to display to the user.
-The asterisk (`*`) is used, along with optionally specifying a parameter's name, to access the remaining portion of the path.
-
+<div id="src/pages/Users.jsx">
 ```jsx
-import { render } from "solid-js/web";
-import { Router, Route } from "@solidjs/router";
+export const Users = () => <div>Users Page</div>;
+```
+</div>
+</TabsCodeBlocks>
 
-import Home from "./pages/Home";
-import Users from "./pages/Users";
-import NotFound from "./pages/404";
 
-const App = (props) => (
-	<>
-		<h1>My Site with lots of pages</h1>
-		{props.children}
-	</>
-);
+Once the `Router` component is set up with the desired routes, the `Route` components will render the specified components when the user navigates to the corresponding paths.
+For example, when the user navigates to `/users`, the `Users` component will be rendered:
 
-render(
-	() => (
-		<Router root={App}>
-			<Route path="/users" component={Users} />
-			<Route path="/" component={Home} />
-			<Route path="*404" component={NotFound} />
-		</Router>
-	),
-	document.getElementById("app")
-);
+```powershell title="http://localhost:3000/1/2"
+Users Page
 ```
 
-4. Lazy-load route components
+## Configuration-based routing
 
-This way, the `Users` and `Home` components will only be loaded when navigating to `/users` or `/`, respectively.
-
-```jsx
-import { lazy } from "solid-js";
-import { render } from "solid-js/web";
-import { Router, Route } from "@solidjs/router";
-
-const Users = lazy(() => import("./pages/Users"));
-const Home = lazy(() => import("./pages/Home"));
-
-const App = (props) => (
-	<>
-		<h1>My Site with lots of pages</h1>
-		{props.children}
-	</>
-);
-
-render(
-	() => (
-		<Router root={App}>
-			<Route path="/users" component={Users} />
-			<Route path="/" component={Home} />
-		</Router>
-	),
-	document.getElementById("app")
-);
-```
-
-### Configuration-based Routing
-
-JSX is not needed to set up routes.
-Routes can be defined as an array of route definitions and passed to the `Router` component:
+JSX is not required to define routes in Solid Router.
+If you prefer, you can define routes using an array of route definitions and pass them to the `Router` component:
 
 ```jsx
 import { lazy } from "solid-js";
@@ -135,34 +70,12 @@ import { Router } from "@solidjs/router";
 
 const routes = [
 	{
-		path: "/users",
-		component: lazy(() => import("/pages/users.js")),
-	},
-	{
-		path: "/users/:id",
-		component: lazy(() => import("/pages/users/[id].js")),
-		children: [
-			{
-				path: "/",
-				component: lazy(() => import("/pages/users/[id]/index.js")),
-			},
-			{
-				path: "/settings",
-				component: lazy(() => import("/pages/users/[id]/settings.js")),
-			},
-			{
-				path: "/*all",
-				component: lazy(() => import("/pages/users/[id]/[...all].js")),
-			},
-		],
-	},
-	{
 		path: "/",
-		component: lazy(() => import("/pages/index.js")),
+		component: import("./pages/Home"),
 	},
 	{
-		path: "/*all",
-		component: lazy(() => import("/pages/[...all].js")),
+		path: "/users",
+		component: import("./pages/Users"),
 	},
 ];
 
@@ -178,8 +91,72 @@ import { Router } from "@solidjs/router";
 
 const route = {
 	path: "/",
-	component: lazy(() => import("/pages/index.js")),
+	component: import("/pages/index.js"),
 };
 
 render(() => <Router>{route}</Router>, document.getElementById("app"));
+```
+
+## CatchAll Route (404 page)
+
+When a user navigates to a path that does not match any of the defined routes, a catchall, or 404 page, can be provided as a fallback option to display to the user.
+This is done by adding a `Route` component with a `path` prop of `*`:
+
+<TabsCodeBlocks>
+
+<div id="src/app.jsx">
+```jsx title="src/app.jsx"
+<Router root={App}>
+	<Route path="/users" component={Users} />
+	<Route path="/" component={Home} />
+	<Route path="*" component={NotFound} />
+</Router>
+```
+</div>
+
+<div id="src/pages/Notfound.jsx">
+```jsx title="src/pages/Notfound.jsx"
+export const NotFound = () => <div>404 Page Not Found</div>;
+```
+</div>
+
+</TabsCodeBlocks>
+
+In the example above, the `NotFound` component will be rendered when the user navigates to a path that does not match any of the defined routes.
+Optionally, you can specify a parameter name to access the remaining portion of the path:
+
+```jsx
+<Route path="/*404" component={NotFound} />
+```
+
+If the user were to navigate to `/some/unknown/path`, the `NotFound` component would be rendered:
+
+```powershell title="http://localhost:3000/some/unknown/path"
+404 Page Not Found
+```
+
+## Lazy-loading routes
+
+To improve the performance of your application, you can use the `lazy` function from Solid to load components only when they are needed.
+This is especially useful for large components that are not needed immediately when the application loads:
+
+```jsx
+const ComplexPage = lazy(() => import("./pages/ComplexPage"));
+```
+
+The `lazy` function takes a function that returns a promise that resolves to the component.
+When the component is needed, the promise will be resolved and the component will be loaded.
+When using configuration-based routing, you can use the `lazy` function to load components lazily, to improve the performance of your application:
+
+```jsx
+const routes = [
+	{
+		path: "/",
+		component: lazy(() => import("./pages/Home")),
+	},
+	{
+		path: "/users",
+		component: lazy(() => import("./pages/Users")),
+	},
+];
 ```
