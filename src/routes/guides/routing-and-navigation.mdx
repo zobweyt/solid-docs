@@ -20,9 +20,17 @@ npm install @solidjs/router
 ```
 </div>
 
-<div id="yarn">```bash frame="none" yarn add @solidjs/router ```</div>
+<div id="yarn">
+```bash frame="none"
+yarn add @solidjs/router
+```
+</div>
 
-<div id="pnpm">```bash frame="none" pnpm add @solidjs/router ```</div>
+<div id="pnpm">
+```bash frame="none"
+pnpm add @solidjs/router
+```
+</div>
 
 <div id="bun">
 ```bash frame="none"
@@ -354,7 +362,7 @@ Wildcard tokens **must** be the last part of the path; `foo/*any/bar` will not c
 ### Multiple paths
 
 The `Routes` component also supports defining multiple paths using an array.
-This allows avoids a route rerendering when switching between two or more locations that it matches:
+This avoids a route rerendering when switching between two or more locations that it matches:
 
 ```jsx
 // Navigating from "/login" to "/register" will not cause the component to re-render
@@ -455,7 +463,7 @@ function preloadUser({ params, location }) {
 The preload function is then passed in the `<Route>` definition:
 
 ```jsx
-<Route path="/users/:id" component={User} preload={loadUser} />
+<Route path="/users/:id" component={User} preload={preloadUser} />
 ```
 
 ---
